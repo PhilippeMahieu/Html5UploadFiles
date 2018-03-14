@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+       <title>YUNDA drag'n'drop file upload V2</title>
+        <script>
+            window.onload = function() {
+                var dropbox = document.getElementById("dropbox");
+                dropbox.addEventListener("dragenter", noop, false);
+                dropbox.addEventListener("dragexit", noop, false);
+                dropbox.addEventListener("dragover", noop, false);
+                dropbox.addEventListener("drop", dropUpload, false);
+            }
+
+            function noop(event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+
+            function dropUpload(event) {
+                noop(event);
+                var files = event.dataTransfer.files;
+                var number = 0;
+                if (files.length > 0) {
+                    number = files.length;
+                }
+                document.getElementById("myText").innerHTML = number;
+
+                upload(files);
+                
+            }
+
+            function upload(files) {
+                //document.getElementById("status").innerHTML = "Uploading " + file.name;
+
+                var formData = new FormData();
+                formData.append("file", files);
+                //formData.append("file", "test");
+
+                var xhr = new XMLHttpRequest();
+                xhr.upload.addEventListener("progress", uploadProgress, false);
+                xhr.addEventListener("load", uploadComplete, false);
+                xhr.open("POST", "/ldr/uploadservletv2", true); // If async=false, then you'll miss progress bar support.
+                xhr.send(formData);
+            }
+
+            function uploadProgress(event) {
+                // Note: doesn't work with async=false.
+                var progress = Math.round(event.loaded / event.total * 100);
+                document.getElementById("status").innerHTML = "Progress " + progress + "%";
+            }
+
+            function uploadComplete(event) {
+                document.getElementById("status").innerHTML = event.target.responseText;
+            }
+        </script>
+        <style>
+            #dropbox {
+                width: 300px;
+                height: 200px;
+                border: 1px solid gray;
+                border-radius: 5px;
+                padding: 5px;
+                color: gray;
+            }
+        </style>
+    </head>
+    <body>
+        <img src="images/OctopusSmall.png" height="50" width="149"/>
+        <div id="dropbox">Drag and drop a file here...</div>
+        <div id="status"></div>
+        <h2>Number of uploaded files is <span id="myText"></span></h2>
+        
+    </body>
+</html>
